@@ -26,7 +26,6 @@ class Socket implements MessageComponentInterface
     {
         $data = get_object_vars(json_decode($msg));
 
-        $return = null;
         switch($data['action'] ?? ''){
         case 'clients':
             $ajax = new AjaxClients($this, $data, $from);
@@ -40,11 +39,19 @@ class Socket implements MessageComponentInterface
     public function onClose(ConnectionInterface $conn)
     {
         $clients = $this->getClients();
-        unset($clients[$conn->resourceId]);
-        $this->setClients($clients);
+        
+        if(array_key_exists($conn->resourceId, $clients)){
+            $room = $clients[$conn->resourceId]['room'];
+            unset($clients[$conn->resourceId]);
+            $this->setClients($clients);
+            $ajax = new AjaxClients($this, null, $conn);
+            $ajax->refreshClients($clients, $room);
+        }
+        
     }
 
     public function onError(ConnectionInterface $conn, \Exception $e)
     {
+        $this->onClose($conn);
     }
 }

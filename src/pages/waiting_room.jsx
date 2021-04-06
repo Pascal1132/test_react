@@ -8,13 +8,14 @@ var conn = new WebSocket('ws://localhost:8085/');
 const WaitingRoomPage = () => {
   const [response, setResponse] = useState("");
   const [room, setRoom] = useState("");
+  const [clients, setClients] = useState({});
   
   useEffect(() => {
     
       conn.onmessage = function(e) { 
         let data = JSON.parse(e.data);
         if(data !== null && data['clients']){
-          console.log('connected : ' + Object.keys(data['clients']).length);
+          setClients(data['clients']);
         }
         
        };
@@ -42,7 +43,7 @@ const WaitingRoomPage = () => {
   return (
     <div className="App">
       <header className="App-header">
-        <h2>Bienvenue dans le salon</h2>
+        <h2>Bienvenue dans le salon <code>{(Object.keys(clients).length !== 0 ) ? Object.keys(clients).length : '' }</code></h2>
         <p>Vous pouvez partager ce lien</p>
         <code>{window.location.href}</code>
         <br />
